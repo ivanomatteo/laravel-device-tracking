@@ -1,4 +1,4 @@
-# Very short description of the package
+# A library that allow to track different devices used
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://packagist.org/packages/ivanomatteo/laravel-device-tracking)
 [![Build Status](https://img.shields.io/travis/ivanomatteo/laravel-device-tracking/master.svg?style=flat-square)](https://travis-ci.org/ivanomatteo/laravel-device-tracking)

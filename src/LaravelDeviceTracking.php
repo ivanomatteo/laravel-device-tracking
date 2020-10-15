@@ -18,20 +18,17 @@ class LaravelDeviceTracking
     {
         if (!isset($this->detectData)) {
 
-            $browser = \Browser::detect();
+            
+            $browser = \App::make('browser-detect')->detect();
             $isBot = $browser->isBot();
             $family = $browser->browserFamily();
             $platform = $browser->platformName();
-            $platformVersion = $browser->platformVersion();
             $deviceModel = $browser->deviceModel();
 
             $arr = [];
 
             if ($isBot) {
                 $arr[] = 'BOT';
-            }
-            if ($platformVersion) {
-                $arr[] = $platformVersion;
             }
             if ($deviceModel) {
                 $arr[] = $deviceModel;
