@@ -12,13 +12,29 @@ This is where your description should go. Try and limit it to a paragraph or two
 You can install the package via composer:
 
 ```bash
+
 composer require ivanomatteo/laravel-device-tracking
+
+php artisan migrate
+
 ```
 
 ## Usage
 
 ``` php
-// Usage description here
+
+//call on login or when you want update anche check the device inforamtion
+\DeviceTracker::findDetectAndUpdate();
+
+/*
+Following events could be emitted:
+
+IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
+IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
+IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
+
+*/
+
 ```
 
 ### Testing
