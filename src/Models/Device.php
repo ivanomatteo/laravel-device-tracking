@@ -66,6 +66,18 @@ class Device extends Model
     function currentUserStatus()
     {
         return $this->hasOne(DeviceUser::class)
-            ->where('user_id', '=', optional(request()->user())->id);
+            ->where('user_id', '=', optional(\Auth::user())->id);
+    }
+    function getCurrentUserVerifiedAtAttribute()
+    {
+        return optional($this->currentUserStatus)->verified_at;
+    }
+
+    function setCurrentUserVerified()
+    {
+        if ($this->currentUserStatus) {
+            $this->currentUserStatus->verified_at = now();
+            $this->currentUserStatus->save();
+        }
     }
 }

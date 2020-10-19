@@ -3,6 +3,7 @@
 namespace IvanoMatteo\LaravelDeviceTracking;
 
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked;
+use IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
@@ -63,7 +64,7 @@ class LaravelDeviceTracking
     {
         $this->detect();
 
-        $device_uuid =  \Str::uuid()->toString();
+        $device_uuid =  \Str::uuid()->toString().':'.\Str::random(16);
         $data = $this->detectData['data'];
         $device_type = $this->detectData['device_type'];
         $ip = request()->ip();
@@ -88,35 +89,41 @@ class LaravelDeviceTracking
 
             $this->detect();
 
+            /** @var Device */
             $device = Device::where('device_uuid', '=', $this->detectData['device_uuid'])->first();
             if (!$device) {
                 $device = $this->newDevice();
             }
 
-            $user = request()->user();
+            $user = \Auth::user();
             
             $device->ip = request()->ip();
             $device->device_type = $this->detectData['device_type'];
             $device->data = array_merge($device->data ?? [], $this->detectData['data']);
 
-            if ($hijacked = $this->getHijackingDetector()->detect($device, $user)) {
+            if ($hijack_message = $this->getHijackingDetector()->detect($device, $user)) {
                 $device->device_hijacked_at = now();
-
-                DeviceHijacked::dispatch($hijacked, $device, $user);
+                DeviceHijacked::dispatch($hijack_message, $device, $user);
             }
 
             $should_attach = $user && (!$device->exists ||  $device->whereHas('user', function ($q) use ($user) {
                 $q->where('device_user.user_id', '=', $user->id);
             })->count() === 0);
 
+            $is_device_dirty = $device->isDirty();
+
             $device->touch();
             $device->save();
+
+            if($is_device_dirty){
+                DeviceUpdated::dispatch($device, $user);
+            }
 
             if ($should_attach) {
                 $device->user()->attach($user);
                 UserSeenFromNewDevice::dispatch($device, $user);
             } else {
-                if ($device->currentUserStatus && !$device->currentUserStatus->verified_at) {
+                if (!$device->currentUserVerifiedAt) {
                     UserSeenFromUnverifiedDevice::dispatch($device, $user);
                 }
             }

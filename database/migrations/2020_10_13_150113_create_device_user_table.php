@@ -19,7 +19,7 @@ class CreateDeviceUserTable extends Migration
             $table->foreignId('device_id')->index();
             $table->index(['user_id','device_id']);
             
-            $table->boolean('verified_at')->nullable();
+            $table->timestamp('verified_at')->nullable();
 
             $table->timestamps();
         });

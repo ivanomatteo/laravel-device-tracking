@@ -21,7 +21,7 @@ php artisan migrate
 
 ## Usage
 
-``` php
+```php
 
 //call on login or when you want update anche check the device inforamtion
 \DeviceTracker::findDetectAndUpdate();
@@ -29,6 +29,7 @@ php artisan migrate
 /*
 Following events could be emitted:
 
+IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated
 IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
 IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
 IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
@@ -39,7 +40,7 @@ IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
 
 ### Testing
 
-``` bash
+```bash
 composer test
 ```
 
@@ -57,8 +58,8 @@ If you discover any security related issues, please email ivanomatteo@gmail.com 
 
 ## Credits
 
-- [Ivano Matteo](https://github.com/ivanomatteo)
-- [All Contributors](../../contributors)
+-   [Ivano Matteo](https://github.com/ivanomatteo)
+-   [All Contributors](../../contributors)
 
 ## License
 
