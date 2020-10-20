@@ -41,7 +41,7 @@ php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\Laravel
 //call on login or when you want update and check the device informations
 $device = \DeviceTracker::findDetectAndUpdate();
 
-//......
+//
 
 // flag as verfified for the current user
 $device->currentUserStatus->verified_at = now();
@@ -61,7 +61,7 @@ protected function authenticated(Request $request, $user)
 {
     $device = \DeviceTracker::findDetectAndUpdate();
 
-    //...
+    //
 }
 
 /*
@@ -78,27 +78,27 @@ Following events could be emitted:
 
 * IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated
 
-...When a new device is detected and stored
+    When a new device is detected and stored
 
 * IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated
 
-...When some information of a device is changed
+    When some information of a device is changed
 
 * IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
 
-...When critical device information are change basing on the logic of
-...the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
-...after this event, the device will be updated, and the next time 
+    When critical device information are change basing on the logic of
+    the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
+    after this event, the device will be updated, and the next time 
 
 * IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
 
-...when an user is detected on a device for the first time DeviceHijacked
-...will not be triggered, but the device will have the device_hijacked_at with 
-...the last DeviceHijacked event timestamp
+    when an user is detected on a device for the first time DeviceHijacked
+    will not be triggered, but the device will have the device_hijacked_at with 
+    the last DeviceHijacked event timestamp
 
 * IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
 
-...When an user is detected on a device not for the first time and the device is not flagged as verified
+    When an user is detected on a device not for the first time and the device is not flagged as verified
 
 ### Changelog
 
