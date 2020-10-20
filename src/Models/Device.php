@@ -92,15 +92,4 @@ class Device extends Model
             ->where('user_id', '=', optional(\Auth::user())->id);
     }
 
-
-   
-
-    
-    function setCurrentUserVerified()
-    {
-        if ($this->currentUserStatus) {
-            $this->currentUserStatus->verified_at = now();
-            $this->currentUserStatus->save();
-        }
-    }
 }

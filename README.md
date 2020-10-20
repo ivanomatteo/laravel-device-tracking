@@ -5,7 +5,9 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://scrutinizer-ci.com/g/ivanomatteo/laravel-device-tracking)
 [![Total Downloads](https://img.shields.io/packagist/dt/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://packagist.org/packages/ivanomatteo/laravel-device-tracking)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+This package implment basically a "google like" device detection.
+you can detect when an user use a new device, and manage the verified status
+between an user and a device
 
 ## Installation
 
@@ -27,18 +29,47 @@ php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\Laravel
 
 ```
 
-
 ## Usage
 
 ```php
 
-//call on login or when you want update anche check the device inforamtion
-\DeviceTracker::findDetectAndUpdate();
+//call on login or when you want update and check the device informations
+$device = \DeviceTracker::findDetectAndUpdate();
 
+//......
+
+// flag as verfified for the current user
+$device->currentUserStatus->verified_at = now();
+$device->currentUserStatus->save();
+
+// flag as verfified for a specific user
+$status = $device->pivot()->where('user_id','=',$specific_user_id)->first();
+$status->verified_at = now();
+$status->save();
+
+
+// if you are using laravel/ui (classic scaffolding)
+// a good place where to trigger the detection is inside 
+// App\Http\Controllers\Auth\LoginController
+// by adding this method:
+protected function authenticated(Request $request, $user)
+{
+    $device = \DeviceTracker::findDetectAndUpdate();
+
+    //...
+}
 
 /*
-Following events could be emitted:
+    It's also possible to call findDetectAndUpdate() on every request, but 
+    in order to reduce the overhead (that anyway is not much) I suggest to call it
+    just on log in, and before important actions. 
+    In these situations you could also log the current device information.
+*/
 
+
+```
+
+Following events could be emitted:
 
 IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated
     When a new device is detected and stored
@@ -51,15 +82,10 @@ IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
     the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
 
 IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
-    When an user is detected on a device for the first time 
+    When an user is detected on a device for the first time
 
 IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
     When an user is detected on a device not for the first time and the device is not flagged as verified
-
-*/
-
-```
-
 
 ### Changelog
 
@@ -81,4 +107,3 @@ If you discover any security related issues, please email ivanomatteo@gmail.com 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
