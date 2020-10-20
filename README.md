@@ -77,22 +77,27 @@ protected function authenticated(Request $request, $user)
 Following events could be emitted:
 
 * IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated
+
 ...When a new device is detected and stored
 
 * IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated
+
 ...When some information of a device is changed
 
 * IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
+
 ...When critical device information are change basing on the logic of
 ...the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
 ...after this event, the device will be updated, and the next time 
 
 * IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
+
 ...when an user is detected on a device for the first time DeviceHijacked
 ...will not be triggered, but the device will have the device_hijacked_at with 
 ...the last DeviceHijacked event timestamp
 
 * IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
+
 ...When an user is detected on a device not for the first time and the device is not flagged as verified
 
 ### Changelog
