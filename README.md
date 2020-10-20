@@ -5,9 +5,14 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://scrutinizer-ci.com/g/ivanomatteo/laravel-device-tracking)
 [![Total Downloads](https://img.shields.io/packagist/dt/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://packagist.org/packages/ivanomatteo/laravel-device-tracking)
 
-This package implment basically a "google like" device detection.
-you can detect when an user use a new device, and manage the verified status
-between an user and a device
+
+This package implement a "google like" device detection.
+
+you can detect when an user is using a new device, and manage the verified status between user and device.
+
+you can also detect a possible device Hijacktion.
+
+
 
 ## Installation
 
@@ -71,21 +76,24 @@ protected function authenticated(Request $request, $user)
 
 Following events could be emitted:
 
-IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated
-    When a new device is detected and stored
+* IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated
+...When a new device is detected and stored
 
-IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated
-    When some information of a device is changed
+* IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated
+...When some information of a device is changed
 
-IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
-    When critical device information are change basing on the logic of
-    the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
+* IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
+...When critical device information are change basing on the logic of
+...the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
+...after this event, the device will be updated, and the next time 
 
-IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
-    When an user is detected on a device for the first time
+* IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
+...when an user is detected on a device for the first time DeviceHijacked
+...will not be triggered, but the device will have the device_hijacked_at with 
+...the last DeviceHijacked event timestamp
 
-IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
-    When an user is detected on a device not for the first time and the device is not flagged as verified
+* IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
+...When an user is detected on a device not for the first time and the device is not flagged as verified
 
 ### Changelog
 
