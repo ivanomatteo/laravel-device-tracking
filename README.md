@@ -68,8 +68,8 @@ protected function authenticated(Request $request, $user)
 
 /*
     It's also possible to call findDetectAndUpdate() on every request, but 
-    in order to reduce the overhead (that anyway is not much) I suggest to call it
-    just on log in, and before important actions. 
+    in order to reduce the overhead (that anyway is not much) 
+    I suggest to call it just on log in, and before important actions. 
     In these situations you could also log the current device information.
 */
 
@@ -78,27 +78,27 @@ protected function authenticated(Request $request, $user)
 
 Following events could be emitted:
 
-* **IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated**
+* **DeviceCreated**
 
     when a new device is detected and stored
 
-* **IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated**
+* **DeviceUpdated**
 
     when some information of a device is changed
 
-* **IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked**
+* **DeviceHijacked**
 
-    when critical device information are change basing on the logic of
-    the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
-    after this event, the device will be updated, and the next time DeviceHijacked
-    will not be emitted, but the device will have the device_hijacked_at field with 
-    the last DeviceHijacked event timestamp
+    when critical device information are changed.
+    You ca also define a custom **DeviceHijackingDetector**.
+    After this event, the device will be updated, and the next time, DeviceHijacked
+    will not be emitted, but the device will have the field **device_hijacked_at**
+    with the last DeviceHijacked event timestamp.
 
-* **IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice**
+* **UserSeenFromNewDevice**
 
     when an user is detected on a device for the first time 
 
-* **IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice**
+* **UserSeenFromUnverifiedDevice**
 
     when an user is detected on a device not for the first time and the device is not flagged as verified
 
