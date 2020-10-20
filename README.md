@@ -10,9 +10,9 @@
 
 This package implement a "google like" device detection.
 
-you can detect when an user is using a new device, and manage the verified status between user and device.
+You can detect when an user is using a new device and manage the verified status between user and device.
 
-you can also detect a possible device hijacking.
+You can also detect a possible device hijacking.
 
 
 
