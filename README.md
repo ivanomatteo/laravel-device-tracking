@@ -19,6 +19,15 @@ php artisan migrate
 
 ```
 
+Publish config file:
+
+```bash
+
+php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\LaravelDeviceTrackingServiceProvider" --tag config
+
+```
+
+
 ## Usage
 
 ```php
@@ -26,23 +35,31 @@ php artisan migrate
 //call on login or when you want update anche check the device inforamtion
 \DeviceTracker::findDetectAndUpdate();
 
+
 /*
 Following events could be emitted:
 
+
+IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated
+    When a new device is detected and stored
+
 IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated
+    When some information of a device is changed
+
 IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked
+    When critical device information are change basing on the logic of
+    the configured IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
+
 IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice
+    When an user is detected on a device for the first time 
+
 IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice
+    When an user is detected on a device not for the first time and the device is not flagged as verified
 
 */
 
 ```
 
-### Testing
-
-```bash
-composer test
-```
 
 ### Changelog
 
@@ -65,6 +82,3 @@ If you discover any security related issues, please email ivanomatteo@gmail.com 
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-## Laravel Package Boilerplate
-
-This package was generated using the [Laravel Package Boilerplate](https://laravelpackageboilerplate.com).

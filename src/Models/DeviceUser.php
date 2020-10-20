@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property int $id
  * @property int $user_id
  * @property int $device_id
- * @property int|null $verified_at
+ * @property string|null $verified_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|DeviceUser newModelQuery()

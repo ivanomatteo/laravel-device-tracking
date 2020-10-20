@@ -1,12 +1,16 @@
 <?php
 namespace IvanoMatteo\LaravelDeviceTracking;
-use Illuminate\Contracts\Auth\Authenticatable;
+
+use Illuminate\Database\Eloquent\Model;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 
 interface DeviceHijackingDetector
 {
     /**
+     * when this function is invoked, the method save() is not called yet
+     * so is possible to use isDirty() method
+     * 
      * @return string|null a message if an hijacking is detected, null otherwise
      */
-    function detect(Device $device,Authenticatable $user = null);
+    function detect(Device $device,?Model $user);
 }

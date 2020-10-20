@@ -6,8 +6,8 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
@@ -26,7 +26,7 @@ class DeviceHijacked
      *
      * @return void
      */
-    public function __construct(string $message,Device $device, ?Authenticatable $user)
+    public function __construct(string $message,Device $device, ?Model $user)
     {
         $this->message = $message;
         $this->device = $device;

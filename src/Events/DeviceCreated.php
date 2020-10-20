@@ -12,7 +12,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 
-class DeviceUpdated
+class DeviceCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
