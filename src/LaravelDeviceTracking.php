@@ -62,12 +62,43 @@ class LaravelDeviceTracking
                 'user_agent' => \Str::limit(request()->header('user-agent'), 512),
             ];
 
-            $device_uuid = \Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
+            $device_uuid = $this->getCookieID();
 
             $this->detectData = compact('device_type', 'data', 'device_uuid');
         }
 
         return $this->detectData;
+    }
+
+
+    function getCookieID(){
+        return \Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
+    }
+    function setCookieID($id){
+        \Cookie::queue(\Cookie::forever(
+            config('laravel-device-tracking.device_cookie'),
+            $id,
+            null,
+            null,
+            null,
+            true, // http only
+            false,
+            null // same site
+        ));
+    }
+
+    /**
+     * @return Device|null
+     */
+    function findCurrentDevice($orNew = false){
+         /** @var Device */
+         $device = Device::where('device_uuid', '=', $this->getCookieID())->first();
+
+         if (!$device && $orNew) {
+            $device = $this->newDeviceFromDetection();
+        }
+
+        return $device;
     }
 
 
@@ -114,7 +145,7 @@ class LaravelDeviceTracking
      * 
      * @return Device the detected device
      */
-    public function findDetectAndUpdate(bool $reDetectDevice = false)
+    public function detectFindAndUpdate(bool $reDetectDevice = false)
     {
         if($reDetectDevice){
             $this->currentDevice = null;
@@ -123,53 +154,40 @@ class LaravelDeviceTracking
         /** @var Model */
         $user = \Auth::user();
 
-        $is_device_just_created = false;
+        $isDeviceJustCreated = false;
      
         
         if (!isset($this->currentDevice)) {
 
             $this->detect();
 
-            /** @var Device */
-            $device = Device::where('device_uuid', '=', $this->detectData['device_uuid'])->first();
-            if (!$device) {
-                $device = $this->newDeviceFromDetection();
-            }
+            $device = $this->findCurrentDevice(true);
 
             $device->ip = request()->ip();
             $device->device_type = $this->detectData['device_type'];
             $device->data = array_merge($device->data ?? [], $this->detectData['data']);
 
 
-            if ($hijack_message = $this->getHijackingDetector()->detect($device, $user)) {
+            if ($hijackMessage = $this->getHijackingDetector()->detect($device, $user)) {
                 $device->device_hijacked_at = now();
-                DeviceHijacked::dispatch($hijack_message, $device, $user);
+                DeviceHijacked::dispatch($hijackMessage, $device, $user);
             }
 
-            $is_device_dirty = $device->isDirty();
-            $is_device_just_created = !$device->exists;
+            $isDeviceDirty = $device->isDirty();
+            $isDeviceJustCreated = !$device->exists;
             
             $device->touch();
             $device->save();
 
-            if ($is_device_dirty) {
-                if($is_device_just_created){
+            if ($isDeviceDirty) {
+                if($isDeviceJustCreated){
                     DeviceCreated::dispatch($device, $user);
                 }else{
                     DeviceUpdated::dispatch($device, $user);
                 }
             }
 
-            \Cookie::queue(\Cookie::forever(
-                config('laravel-device-tracking.device_cookie'),
-                $device->device_uuid,
-                null,
-                null,
-                null,
-                true, // http only
-                false,
-                null // same site
-            ));
+            $this->setCookieID($device->device_uuid);
 
             $this->currentDevice = $device;
         }
@@ -179,11 +197,11 @@ class LaravelDeviceTracking
 
         if ($newUserId && $this->userId !== $newUserId) {
 
-            $should_attach = $user && ($is_device_just_created || $this->currentDevice->whereHas('user', function ($q) use ($newUserId) {
+            $shouldAttack = $user && ($isDeviceJustCreated || $this->currentDevice->whereHas('user', function ($q) use ($newUserId) {
                 $q->where('device_user.user_id', '=', $newUserId);
             })->count() === 0);
 
-            if ($should_attach) {
+            if ($shouldAttack) {
                 $this->currentDevice->user()->attach($user);
                 UserSeenFromNewDevice::dispatch($this->currentDevice, $user);
             } else {

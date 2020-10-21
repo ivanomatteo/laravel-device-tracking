@@ -41,7 +41,7 @@ php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\Laravel
 ```php
 
 //call on login or when you want update and check the device informations
-$device = \DeviceTracker::findDetectAndUpdate();
+$device = \DeviceTracker::detectFindAndUpdate();
 
 //
 
@@ -56,25 +56,28 @@ $status->save();
 
 
 // if you are using laravel/ui (classic scaffolding)
-// a good place where to trigger the detection is inside 
+// a good place where detectFindAndUpdate() is in the login controller
 // App\Http\Controllers\Auth\LoginController
 // by adding this method:
 protected function authenticated(Request $request, $user)
 {
-    $device = \DeviceTracker::findDetectAndUpdate();
+    $device = \DeviceTracker::detectFindAndUpdate();
 
     //
 }
 
-/*
-    It's also possible to call findDetectAndUpdate() on every request, but 
-    in order to reduce the overhead (that anyway is not much) 
-    I suggest to call it just on log in, and before important actions. 
-    In these situations you could also log the current device information.
-*/
-
-
 ```
+
+If you are using Session Autentication it's possible to add the middleware
+**DeviceDetectMiddleware** in app/Http/Kernel.php, at the end of **web** group.
+
+In this way, the device will be checked also for requests **subsequents** to the login request.
+**DeviceDetectMiddleware** will store the md5( $device_uuid . $user_agent ) inside the session
+so the detection will be executed again only if the hash do not match  
+
+
+
+
 
 Following events could be emitted:
 
