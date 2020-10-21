@@ -10,6 +10,7 @@ use IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LaravelDeviceTracking
 {
@@ -71,10 +72,12 @@ class LaravelDeviceTracking
     }
 
 
-    function getCookieID(){
+    function getCookieID()
+    {
         return \Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
     }
-    function setCookieID($id){
+    function setCookieID($id)
+    {
         \Cookie::queue(\Cookie::forever(
             config('laravel-device-tracking.device_cookie'),
             $id,
@@ -90,15 +93,45 @@ class LaravelDeviceTracking
     /**
      * @return Device|null
      */
-    function findCurrentDevice($orNew = false){
-         /** @var Device */
-         $device = Device::where('device_uuid', '=', $this->getCookieID())->first();
-
-         if (!$device && $orNew) {
-            $device = $this->newDeviceFromDetection();
+    function findCurrentDevice($orNew = false, $update = false)
+    {
+        if (isset($this->currentDevice)) {
+            return $this->currentDevice;
         }
 
-        return $device;
+        $this->currentDevice = Device::where('device_uuid', '=', $this->getCookieID())->first();
+
+        if (!$this->currentDevice && $orNew) {
+            $this->currentDevice = $this->newDeviceFromDetection();
+        }
+
+        if ($this->currentDevice && $update) {
+            $this->detect();
+            $this->currentDevice->ip = request()->ip();
+            $this->currentDevice->device_type = $this->detectData['device_type'];
+            $this->currentDevice->data = array_merge($this->currentDevice->data ?? [], $this->detectData['data']);
+        }
+
+        return $this->currentDevice;
+    }
+
+
+    function flagAsVerified(Device $device, $user)
+    {
+        $device->pivot()
+            ->where('user_id', '=', $user)
+            ->update(['verified_at' => now()]);
+    }
+
+    function flagCurrentAsVerified()
+    {
+        if (\Auth::check()) {
+            $this->detectFindAndUpdate()->currentUserStatus
+                ->fill(['verified_at' => now()])
+                ->save();
+        } else {
+            throw new HttpException(500, 'an unser must be logged in to verify the current device');
+        }
     }
 
 
@@ -147,7 +180,7 @@ class LaravelDeviceTracking
      */
     public function detectFindAndUpdate(bool $reDetectDevice = false)
     {
-        if($reDetectDevice){
+        if ($reDetectDevice) {
             $this->currentDevice = null;
         }
 
@@ -155,41 +188,32 @@ class LaravelDeviceTracking
         $user = \Auth::user();
 
         $isDeviceJustCreated = false;
-     
-        
+
+
         if (!isset($this->currentDevice)) {
 
-            $this->detect();
+            $this->findCurrentDevice(true, true);
 
-            $device = $this->findCurrentDevice(true);
-
-            $device->ip = request()->ip();
-            $device->device_type = $this->detectData['device_type'];
-            $device->data = array_merge($device->data ?? [], $this->detectData['data']);
-
-
-            if ($hijackMessage = $this->getHijackingDetector()->detect($device, $user)) {
-                $device->device_hijacked_at = now();
-                DeviceHijacked::dispatch($hijackMessage, $device, $user);
+            if ($hijackMessage = $this->getHijackingDetector()->detect($this->currentDevice, $user)) {
+                $this->currentDevice->device_hijacked_at = now();
+                DeviceHijacked::dispatch($hijackMessage, $this->currentDevice, $user);
             }
 
-            $isDeviceDirty = $device->isDirty();
-            $isDeviceJustCreated = !$device->exists;
-            
-            $device->touch();
-            $device->save();
+            $isDeviceDirty = $this->currentDevice->isDirty();
+            $isDeviceJustCreated = !$this->currentDevice->exists;
+
+            $this->currentDevice->touch();
+            $this->currentDevice->save();
 
             if ($isDeviceDirty) {
-                if($isDeviceJustCreated){
-                    DeviceCreated::dispatch($device, $user);
-                }else{
-                    DeviceUpdated::dispatch($device, $user);
+                if ($isDeviceJustCreated) {
+                    DeviceCreated::dispatch($this->currentDevice, $user);
+                } else {
+                    DeviceUpdated::dispatch($this->currentDevice, $user);
                 }
             }
 
-            $this->setCookieID($device->device_uuid);
-
-            $this->currentDevice = $device;
+            $this->setCookieID($this->currentDevice->device_uuid);
         }
 
 

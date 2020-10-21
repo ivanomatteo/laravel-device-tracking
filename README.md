@@ -43,16 +43,12 @@ php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\Laravel
 //call on login or when you want update and check the device informations
 $device = \DeviceTracker::detectFindAndUpdate();
 
-//
 
 // flag as verfified for the current user
-$device->currentUserStatus->verified_at = now();
-$device->currentUserStatus->save();
+\DeviceTracker::flagCurrentAsVerified();
 
 // flag as verfified for a specific user
-$status = $device->pivot()->where('user_id','=',$specific_user_id)->first();
-$status->verified_at = now();
-$status->save();
+\DeviceTracker::flagAsVerified($device, $user);
 
 
 // if you are using laravel/ui (classic scaffolding)
