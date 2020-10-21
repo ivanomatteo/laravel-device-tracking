@@ -69,7 +69,7 @@ protected function authenticated(Request $request, $user)
 ```
 
 If you are using Session Autentication it's possible to add the middleware
-**DeviceDetectMiddleware** in app/Http/Kernel.php, at the end of **web** group.
+**IvanoMatteo\LaravelDeviceTracking\Http\Middleware\DeviceDetectMiddleware** in app/Http/Kernel.php, at the end of **web** group.
 
 In this way, the device will be checked also for requests **subsequents** to the login request.
 **DeviceDetectMiddleware** will store the md5( $device_uuid . $user_agent ) inside the session
