@@ -4,7 +4,7 @@ namespace IvanoMatteo\LaravelDeviceTracking\Http\Middleware;
 
 use Closure;
 
-class DeviceDetectMiddleware
+class DeviceTrackerMiddleware
 {
     /**
      * Handle an incoming request.
