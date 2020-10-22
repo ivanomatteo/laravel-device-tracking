@@ -59,7 +59,7 @@ class Device extends Model
     /**
      * @return string user class fqn
      */
-    private function getUserClass(){
+    static function getUserClass(){
         $u = config('laravel-device-tracking.user_model');
 
         if(!$u){
@@ -74,7 +74,7 @@ class Device extends Model
 
     function user()
     {
-        return $this->belongsToMany($this->getUserClass(), 'device_user')
+        return $this->belongsToMany(static::getUserClass(), 'device_user')
             ->using(DeviceUser::class)
             ->withPivot('verified_at')->withTimestamps();
     }

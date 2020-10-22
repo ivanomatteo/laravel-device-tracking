@@ -10,6 +10,7 @@ use IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
+use IvanoMatteo\LaravelDeviceTracking\Models\DeviceUser;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class LaravelDeviceTracking
@@ -56,10 +57,14 @@ class LaravelDeviceTracking
 
             // other metadata
             $data = [
+                'is_bot' => $isBot,
                 'version' => $browser->browserVersion(),
                 'engine' => $browser->browserEngine(),
-                'bot' => $isBot,
-                'ips' => request()->ips(),
+                'platform_family' => $browser->platformFamily(),
+                'platform_name' => $browser->platformName(),
+                'platform_version' => $browser->platformVersion(),
+                'device_model' => $browser->deviceModel(),
+                'ip_addresses' => request()->ips(),
                 'user_agent' => \Str::limit(request()->header('user-agent'), 512),
             ];
 
@@ -72,10 +77,55 @@ class LaravelDeviceTracking
     }
 
 
+    /**
+     * return true if match
+     * return false if not match
+     * return null if web guard is not logged in
+     * 
+     * @return bool|null 
+     */
+    function checkSessionDeviceHash()
+    {
+        if (\Auth::guard('web')->check()) {
+
+            $sessionMd5 = session(config('laravel-device-tracking.session_key'));
+            $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
+
+            if (!$sessionMd5 || $currentMd5 !== $sessionMd5) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * id web guard is logged in, this function will store 
+     * the device hash in the session
+     */
+    function setSessionDeviceHash()
+    {
+        if (\Auth::guard('web')->check()) {
+
+            $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
+            session([config('laravel-device-tracking.session_key') => $currentMd5]);
+        }
+    }
+
+    /**
+     * retrieve the device identifier from cookie 
+     * @return string 
+     * */
     function getCookieID()
     {
         return \Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
     }
+
+    /**
+     * set the device identifier cookie
+     */
     function setCookieID($id)
     {
         \Cookie::queue(\Cookie::forever(
@@ -116,10 +166,18 @@ class LaravelDeviceTracking
     }
 
 
-    function flagAsVerified(Device $device, $user)
+    function flagAsVerified(Device $device, $user_id)
     {
         $device->pivot()
-            ->where('user_id', '=', $user)
+            ->where('user_id', '=', $user_id)
+            ->update(['verified_at' => now()]);
+    }
+    function flagAsVerifiedByUuid($device_uuid, $user)
+    {
+        DeviceUser::where('user_id', '=', $user)
+            ->whereHas('device', function ($q) use ($device_uuid) {
+                $q->where('device_uuid', '=', $device_uuid);
+            })
             ->update(['verified_at' => now()]);
     }
 
@@ -213,6 +271,7 @@ class LaravelDeviceTracking
                 }
             }
 
+            $this->setSessionDeviceHash();
             $this->setCookieID($this->currentDevice->device_uuid);
         }
 

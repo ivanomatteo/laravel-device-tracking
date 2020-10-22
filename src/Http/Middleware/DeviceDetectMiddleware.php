@@ -21,12 +21,8 @@ class DeviceDetectMiddleware
             /** @var LaravelDeviceTracking */
             $ldt = resolve('laravel-device-tracking');
 
-            $sessionMd5 = session('laravel-device-tracking');
-            $currentMd5 = md5($request->userAgent() . $ldt->getCookieID());
-
-            if (!$sessionMd5 || $currentMd5 !== $sessionMd5) {
+            if ($ldt->checkSessionDeviceHash() === false) {
                 $ldt->detectFindAndUpdate();
-                session(['laravel-device-tracking' => $currentMd5]);
             }
             
         }

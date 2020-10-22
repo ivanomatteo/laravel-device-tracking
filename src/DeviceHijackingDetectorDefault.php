@@ -12,7 +12,7 @@ class DeviceHijackingDetectorDefault implements DeviceHijackingDetector
     {
         if($device->exists){ //exists in db
             if ($device->isDirty('device_type')) {
-                return 'device_type missmatch';
+                return 'device_type mismatch';
             }
 
             // EXAMPLES --------------------

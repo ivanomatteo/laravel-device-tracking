@@ -48,7 +48,11 @@ $device = \DeviceTracker::detectFindAndUpdate();
 \DeviceTracker::flagCurrentAsVerified();
 
 // flag as verfified for a specific user
-\DeviceTracker::flagAsVerified($device, $user);
+\DeviceTracker::flagAsVerified($device, $user_id);
+
+// flag as verfified for a specific user by device uuid
+\DeviceTracker::flagAsVerifiedByUuid($device_uuid, $user_id);
+
 
 
 // if you are using laravel/ui (classic scaffolding)

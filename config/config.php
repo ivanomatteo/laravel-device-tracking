@@ -10,6 +10,8 @@ return [
     // the device identifier cookie
     'device_cookie' => 'device_uuid',
 
+    'session_key' => 'laravel-device-tracking',
+
     // must implement: IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
     'hijacking_detector' => DeviceHijackingDetectorDefault::class,
 ];
