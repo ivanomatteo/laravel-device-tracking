@@ -95,7 +95,7 @@ Following events could be emitted:
 
 * **DeviceUpdated**
 
-    when some information of a device is changed
+    when some information of a device are changed
 
 * **DeviceHijacked**
 
