@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property string|null $verified_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \IvanoMatteo\LaravelDeviceTracking\Models\Device $device
+ * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|DeviceUser newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|DeviceUser newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|DeviceUser query()

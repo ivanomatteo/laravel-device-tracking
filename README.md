@@ -40,6 +40,14 @@ php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\Laravel
 
 ```php
 
+// add the trait to your user model
+class User{
+    //...
+    use IvanoMatteo\LaravelDeviceTracking\Traits\UseDevices;
+    //...
+}
+
+
 //call on login or when you want update and check the device informations
 $device = \DeviceTracker::detectFindAndUpdate();
 
