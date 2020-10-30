@@ -1,4 +1,4 @@
-# A library that allow to track different devices used
+# A library that allows you to track different devices used per user
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://packagist.org/packages/ivanomatteo/laravel-device-tracking)
 
@@ -8,7 +8,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/ivanomatteo/laravel-device-tracking.svg?style=flat-square)](https://packagist.org/packages/ivanomatteo/laravel-device-tracking)
 
 
-This package implement a "google like" device detection.
+This package implements a "google like" device detection.
 
 You can detect when an user is using a new device and manage the verified status between user and device.
 
@@ -48,17 +48,17 @@ class User{
 }
 
 
-//call on login or when you want update and check the device informations
+// call on login or when you want update and check the device informations
 $device = \DeviceTracker::detectFindAndUpdate();
 
 
-// flag as verfified for the current user
+// flag as verified for the current user
 \DeviceTracker::flagCurrentAsVerified();
 
-// flag as verfified for a specific user
+// flag as verified for a specific user
 \DeviceTracker::flagAsVerified($device, $user_id);
 
-// flag as verfified for a specific user by device uuid
+// flag as verified for a specific user by device uuid
 \DeviceTracker::flagAsVerifiedByUuid($device_uuid, $user_id);
 
 
@@ -79,15 +79,15 @@ protected function authenticated(Request $request, $user)
 If you are using Session Autentication it's possible to add the middleware
 **IvanoMatteo\LaravelDeviceTracking\Http\Middleware\DeviceTrackerMiddleware** in app/Http/Kernel.php, at the end of **web** group.
 
-In this way, the device will be checked also for requests **subsequents** to the login request.
+This way, the device will also be checked for **subsequents** requests to the login request.
 **DeviceTrackerMiddleware** will store the md5( $device_uuid . $user_agent ) inside the session
-so the detection will be executed again only if the hash do not match  
+so the detection will be executed again only if the hash does not match.  
 
 
 
 
 
-Following events could be emitted:
+Following events can be emitted:
 
 * **DeviceCreated**
 
@@ -95,12 +95,12 @@ Following events could be emitted:
 
 * **DeviceUpdated**
 
-    when some information of a device are changed
+    when some information of a device is changed
 
 * **DeviceHijacked**
 
-    when critical device information are changed.
-    You ca also define a custom **DeviceHijackingDetector**.
+    when critical device information is changed.
+    You can also define a custom **DeviceHijackingDetector**.
     After this event, the device will be updated, and the next time, DeviceHijacked
     will not be emitted, but the device will have the field **device_hijacked_at**
     with the last DeviceHijacked event timestamp.
