@@ -63,8 +63,8 @@ class Device extends Model
         $u = config('laravel-device-tracking.user_model');
 
         if(!$u){
-            if(class_exists("App\\Model\\User")){
-                $u = "App\\Model\\User";
+            if(class_exists("App\\Models\\User")){
+                $u = "App\\Models\\User";
             }else if(class_exists("App\\User")){
                 $u = "App\\User";
             }
@@ -78,14 +78,14 @@ class Device extends Model
             ->using(DeviceUser::class)
             ->withPivot('verified_at')->withTimestamps();
     }
-    
-    
+
+
     function pivot()
     {
         return $this->hasMany(DeviceUser::class);
     }
-    
-    
+
+
     function currentUserStatus()
     {
         return $this->hasOne(DeviceUser::class)
