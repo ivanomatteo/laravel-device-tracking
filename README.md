@@ -10,7 +10,7 @@
 
 This package implements a "google like" device detection.
 
-You can detect when an user is using a new device and manage the verified status between user and device.
+You can detect when a user is using a new device and manage the verified status between user and device.
 
 You can also detect a possible device hijacking.
 
@@ -76,7 +76,7 @@ protected function authenticated(Request $request, $user)
 
 ```
 
-If you are using Session Autentication it's possible to add the middleware
+If you are using Session Authentication it's possible to add the middleware
 **IvanoMatteo\LaravelDeviceTracking\Http\Middleware\DeviceTrackerMiddleware** in app/Http/Kernel.php, at the end of **web** group.
 
 This way, the device will also be checked for **subsequents** requests to the login request.
@@ -107,11 +107,11 @@ Following events can be emitted:
 
 * **UserSeenFromNewDevice**
 
-    when an user is detected on a device for the first time 
+    when a user is detected on a device for the first time 
 
 * **UserSeenFromUnverifiedDevice**
 
-    when an user is detected on a device not for the first time and the device is not flagged as verified
+    when a user is detected on a device not for the first time and the device is not flagged as verified
 
 ### Changelog
 
