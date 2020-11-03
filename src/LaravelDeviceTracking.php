@@ -219,7 +219,7 @@ class LaravelDeviceTracking
         if (!isset($this->hijackingDetector)) {
             $tmp = \App::make(config('laravel-device-tracking.hijacking_detector'));
             if (!is_object($tmp) || !is_subclass_of($tmp, DeviceHijackingDetector::class)) {
-                abort(500, get_class($tmp) . 'do not implements DeviceHijackingDetector');
+                abort(500, get_class($tmp) . ' do not implements DeviceHijackingDetector');
             }
             $this->hijackingDetector = $tmp;
         }
