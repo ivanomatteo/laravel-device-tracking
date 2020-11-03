@@ -19,7 +19,7 @@ class DeviceTrackerMiddleware
         if (\Auth::guard('web')->check()) {
 
             /** @var LaravelDeviceTracking */
-            $ldt = resolve('laravel-device-tracking');
+            $ldt = \App::make('laravel-device-tracking');
 
             if ($ldt->checkSessionDeviceHash() === false) {
                 $ldt->detectFindAndUpdate();
