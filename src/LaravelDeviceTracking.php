@@ -4,6 +4,10 @@ namespace IvanoMatteo\LaravelDeviceTracking;
 
 use hisorange\BrowserDetect\Contracts\ResultInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated;
@@ -21,16 +25,16 @@ class LaravelDeviceTracking
     private $hijackingDetector;
 
 
-    /** 
+    /**
      * retrieve device informations from the user-agent string
-     * @return array 
+     * @return array
      * */
     public function detect()
     {
         if (!isset($this->detectData)) {
 
             /** @var ResultInterface */
-            $browser = \App::make('browser-detect')->detect();
+            $browser = App::make('browser-detect')->detect();
             $isBot = $browser->isBot();
             $family = $browser->browserFamily();
             $platform = $browser->platformFamily();
@@ -51,7 +55,7 @@ class LaravelDeviceTracking
                 $features[] = $family;
             }
 
-            // device type is a generated identifier 
+            // device type is a generated identifier
             // that normally should not change
             $device_type = implode("|", $features);
 
@@ -65,7 +69,7 @@ class LaravelDeviceTracking
                 'platform_version' => $browser->platformVersion(),
                 'device_model' => $browser->deviceModel(),
                 'ip_addresses' => request()->ips(),
-                'user_agent' => \Str::limit(request()->header('user-agent'), 512),
+                'user_agent' => Str::limit(request()->header('user-agent'), 512),
             ];
 
             $device_uuid = $this->getCookieID();
@@ -81,13 +85,12 @@ class LaravelDeviceTracking
      * return true if match
      * return false if not match
      * return null if web guard is not logged in
-     * 
-     * @return bool|null 
+     *
+     * @return bool|null
      */
-    function checkSessionDeviceHash()
+    public function checkSessionDeviceHash()
     {
-        if (\Auth::guard('web')->check()) {
-
+        if (Auth::guard('web')->check()) {
             $sessionMd5 = session(config('laravel-device-tracking.session_key'));
             $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
 
@@ -102,33 +105,32 @@ class LaravelDeviceTracking
     }
 
     /**
-     * id web guard is logged in, this function will store 
+     * id web guard is logged in, this function will store
      * the device hash in the session
      */
-    function setSessionDeviceHash()
+    public function setSessionDeviceHash()
     {
-        if (\Auth::guard('web')->check()) {
-
+        if (Auth::guard('web')->check()) {
             $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
             session([config('laravel-device-tracking.session_key') => $currentMd5]);
         }
     }
 
     /**
-     * retrieve the device identifier from cookie 
-     * @return string 
+     * retrieve the device identifier from cookie
+     * @return string
      * */
-    function getCookieID()
+    public function getCookieID()
     {
-        return \Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
+        return Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
     }
 
     /**
      * set the device identifier cookie
      */
-    function setCookieID($id)
+    public function setCookieID($id)
     {
-        \Cookie::queue(\Cookie::forever(
+        Cookie::queue(Cookie::forever(
             config('laravel-device-tracking.device_cookie'),
             $id,
             null,
@@ -143,7 +145,7 @@ class LaravelDeviceTracking
     /**
      * @return Device|null
      */
-    function findCurrentDevice($orNew = false, $update = false)
+    public function findCurrentDevice($orNew = false, $update = false)
     {
         if (isset($this->currentDevice)) {
             return $this->currentDevice;
@@ -166,13 +168,13 @@ class LaravelDeviceTracking
     }
 
 
-    function flagAsVerified(Device $device, $user_id)
+    public function flagAsVerified(Device $device, $user_id)
     {
         $device->pivot()
             ->where('user_id', '=', $user_id)
             ->update(['verified_at' => now()]);
     }
-    function flagAsVerifiedByUuid($device_uuid, $user)
+    public function flagAsVerifiedByUuid($device_uuid, $user)
     {
         DeviceUser::where('user_id', '=', $user)
             ->whereHas('device', function ($q) use ($device_uuid) {
@@ -181,9 +183,9 @@ class LaravelDeviceTracking
             ->update(['verified_at' => now()]);
     }
 
-    function flagCurrentAsVerified()
+    public function flagCurrentAsVerified()
     {
-        if (\Auth::check()) {
+        if (Auth::check()) {
             $this->detectFindAndUpdate()->currentUserStatus
                 ->fill(['verified_at' => now()])
                 ->save();
@@ -193,15 +195,15 @@ class LaravelDeviceTracking
     }
 
 
-    /** 
+    /**
      * create a new Device instance using detected data
-     * @return Device 
+     * @return Device
      */
     public function newDeviceFromDetection()
     {
         $this->detect();
 
-        $device_uuid =  \Str::uuid()->toString() . ':' . \Str::random(16);
+        $device_uuid =  Str::uuid()->toString() . ':' . Str::random(16);
         $data = $this->detectData['data'];
         $device_type = $this->detectData['device_type'];
         $ip = request()->ip();
@@ -212,12 +214,12 @@ class LaravelDeviceTracking
 
     /**
      * provide an DeviceHijackingDetector the class from config
-     * @return DeviceHijackingDetector 
+     * @return DeviceHijackingDetector
      */
     public function getHijackingDetector()
     {
         if (!isset($this->hijackingDetector)) {
-            $tmp = \App::make(config('laravel-device-tracking.hijacking_detector'));
+            $tmp = App::make(config('laravel-device-tracking.hijacking_detector'));
             if (!is_object($tmp) || !is_subclass_of($tmp, DeviceHijackingDetector::class)) {
                 abort(500, get_class($tmp) . ' do not implements DeviceHijackingDetector');
             }
@@ -231,9 +233,9 @@ class LaravelDeviceTracking
      * if an user is logged in, then bind the user with the device,
      * trigger the events,
      * store the cookie with the device identifier
-     * 
+     *
      * @param bool $reDetectDevice force device detection to run again
-     * 
+     *
      * @return Device the detected device
      */
     public function detectFindAndUpdate(bool $reDetectDevice = false)
@@ -243,13 +245,12 @@ class LaravelDeviceTracking
         }
 
         /** @var Model */
-        $user = \Auth::user();
+        $user = Auth::user();
 
         $isDeviceJustCreated = false;
 
 
         if (!isset($this->currentDevice)) {
-
             $this->findCurrentDevice(true, true);
 
             if ($hijackMessage = $this->getHijackingDetector()->detect($this->currentDevice, $user)) {
@@ -279,7 +280,6 @@ class LaravelDeviceTracking
         $newUserId = optional($user)->getKey();
 
         if ($newUserId && $this->userId !== $newUserId) {
-
             $shouldAttack = $user && ($isDeviceJustCreated || $this->currentDevice->whereHas('user', function ($q) use ($newUserId) {
                 $q->where('device_user.user_id', '=', $newUserId);
             })->count() === 0);

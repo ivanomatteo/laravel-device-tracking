@@ -19,7 +19,6 @@ class DeviceCreated
     public $device;
     public $user;
 
-
     /**
      * Create a new event instance.
      *

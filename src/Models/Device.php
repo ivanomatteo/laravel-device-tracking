@@ -2,10 +2,10 @@
 
 namespace IvanoMatteo\LaravelDeviceTracking\Models;
 
-
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * IvanoMatteo\LaravelDeviceTracking\Models\Device
@@ -52,27 +52,28 @@ class Device extends Model
     ];
 
 
-    function touch()
+    public function touch()
     {
         $this->{static::UPDATED_AT} = now();
     }
     /**
      * @return string user class fqn
      */
-    static function getUserClass(){
+    public static function getUserClass()
+    {
         $u = config('laravel-device-tracking.user_model');
 
-        if(!$u){
-            if(class_exists("App\\Models\\User")){
+        if (!$u) {
+            if (class_exists("App\\Models\\User")) {
                 $u = "App\\Models\\User";
-            }else if(class_exists("App\\User")){
+            } elseif (class_exists("App\\User")) {
                 $u = "App\\User";
             }
         }
         return $u;
     }
 
-    function user()
+    public function user()
     {
         return $this->belongsToMany(static::getUserClass(), 'device_user')
             ->using(DeviceUser::class)
@@ -80,16 +81,15 @@ class Device extends Model
     }
 
 
-    function pivot()
+    public function pivot()
     {
         return $this->hasMany(DeviceUser::class);
     }
 
 
-    function currentUserStatus()
+    public function currentUserStatus()
     {
         return $this->hasOne(DeviceUser::class)
-            ->where('user_id', '=', optional(\Auth::user())->id);
+            ->where('user_id', '=', optional(Auth::user())->id);
     }
-
 }

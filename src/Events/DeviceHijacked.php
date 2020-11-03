@@ -26,7 +26,7 @@ class DeviceHijacked
      *
      * @return void
      */
-    public function __construct(string $message,Device $device, ?Model $user)
+    public function __construct(string $message, Device $device, ?Model $user)
     {
         $this->message = $message;
         $this->device = $device;

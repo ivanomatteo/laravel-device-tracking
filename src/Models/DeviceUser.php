@@ -29,10 +29,12 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class DeviceUser extends Pivot
 {
-    function device(){
+    public function device()
+    {
         return $this->belongsTo(Device::class);
     }
-    function user(){
+    public function user()
+    {
         return $this->belongsTo(Device::getUserClass());
     }
 }
