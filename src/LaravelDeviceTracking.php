@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked;
@@ -68,8 +69,8 @@ class LaravelDeviceTracking
                 'platform_name' => $browser->platformName(),
                 'platform_version' => $browser->platformVersion(),
                 'device_model' => $browser->deviceModel(),
-                'ip_addresses' => request()->ips(),
-                'user_agent' => Str::limit(request()->header('user-agent'), 512),
+                'ip_addresses' => Request::ips(),
+                'user_agent' => Str::limit(Request::header('user-agent'), 512),
             ];
 
             $device_uuid = $this->getCookieID();
@@ -80,6 +81,11 @@ class LaravelDeviceTracking
         return $this->detectData;
     }
 
+
+    public function getRequestHash()
+    {
+        return md5(Request::ip() . Request::userAgent() . $this->getCookieID());
+    }
 
     /**
      * return true if match
@@ -93,7 +99,7 @@ class LaravelDeviceTracking
         if (Auth::guard('web')->check()) {
 
             $sessionMd5 = session(config('laravel-device-tracking.session_key'));
-            $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
+            $currentMd5 = $this->getRequestHash();
 
             if (!$sessionMd5 || $currentMd5 !== $sessionMd5) {
                 return false;
@@ -113,7 +119,7 @@ class LaravelDeviceTracking
     {
         if (Auth::guard('web')->check()) {
 
-            $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
+            $currentMd5 = $this->getRequestHash();
             session([config('laravel-device-tracking.session_key') => $currentMd5]);
         }
     }
@@ -124,7 +130,8 @@ class LaravelDeviceTracking
      * */
     public function getCookieID()
     {
-        return Str::limit(request()->cookie(config('laravel-device-tracking.device_cookie')), 255, '');
+
+        return Str::limit(Request::cookie(config('laravel-device-tracking.device_cookie')), 255, '');
     }
 
     /**
@@ -161,7 +168,7 @@ class LaravelDeviceTracking
 
         if ($this->currentDevice && $update) {
             $this->detect();
-            $this->currentDevice->ip = request()->ip();
+            $this->currentDevice->ip = Request::ip();
             $this->currentDevice->device_type = $this->detectData['device_type'];
             $this->currentDevice->data = array_merge($this->currentDevice->data ?? [], $this->detectData['data']);
         }
@@ -208,7 +215,7 @@ class LaravelDeviceTracking
         $device_uuid =  Str::uuid()->toString() . ':' . Str::random(16);
         $data = $this->detectData['data'];
         $device_type = $this->detectData['device_type'];
-        $ip = request()->ip();
+        $ip = Request::ip();
 
         return new Device(compact('device_uuid', 'data', 'device_type', 'ip'));
     }
@@ -223,7 +230,7 @@ class LaravelDeviceTracking
         if (!isset($this->hijackingDetector)) {
             $tmp = App::make(config('laravel-device-tracking.hijacking_detector'));
             if (!is_object($tmp) || !is_subclass_of($tmp, DeviceHijackingDetector::class)) {
-                abort(500, get_class($tmp) . ' do not implements DeviceHijackingDetector');
+                throw new HttpException(500, get_class($tmp) . ' do not implements DeviceHijackingDetector');
             }
             $this->hijackingDetector = $tmp;
         }

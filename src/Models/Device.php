@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * IvanoMatteo\LaravelDeviceTracking\Models\Device
@@ -44,6 +45,7 @@ use Illuminate\Support\Facades\Auth;
 class Device extends Model
 {
     use SoftDeletes;
+    protected static $class;
 
 
     protected $guarded = [];
@@ -61,15 +63,30 @@ class Device extends Model
      */
     public static function getUserClass()
     {
+        if (isset(static::$class)) {
+            return static::$class;
+        }
+
         $u = config('laravel-device-tracking.user_model');
 
         if (!$u) {
             if (class_exists("App\\Models\\User")) {
                 $u = "App\\Models\\User";
-            } elseif (class_exists("App\\User")) {
+            } else if (class_exists("App\\User")) {
                 $u = "App\\User";
             }
         }
+
+        if (!class_exists($u)) {
+            throw new HttpException(500, "class $u not found");
+        }
+
+        if (!is_subclass_of($u, Model::class)) {
+            throw new HttpException(500, "class $u is not  model");
+        }
+
+        static::$class = $u;
+
         return $u;
     }
 

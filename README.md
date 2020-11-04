@@ -80,7 +80,7 @@ If you are using Session Authentication it's possible to add the middleware
 **IvanoMatteo\LaravelDeviceTracking\Http\Middleware\DeviceTrackerMiddleware** in app/Http/Kernel.php, at the end of **web** group.
 
 This way, the device will also be checked for **subsequents** requests to the login request.
-**DeviceTrackerMiddleware** will store the md5( $device_uuid . $user_agent ) inside the session
+**DeviceTrackerMiddleware** will store the md5(request()->ip() . $device_uuid . $user_agent ) inside the session
 so the detection will be executed again only if the hash does not match.  
 
 
