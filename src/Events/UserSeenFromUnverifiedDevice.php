@@ -25,10 +25,9 @@ class UserSeenFromUnverifiedDevice
      *
      * @return void
      */
-    public function __construct(Device $device,?Model $user)
+    public function __construct(Device $device, ?Model $user)
     {
         $this->device = $device;
         $this->user = $user;
     }
-
 }

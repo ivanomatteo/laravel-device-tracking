@@ -7,7 +7,6 @@ use IvanoMatteo\LaravelDeviceTracking\LaravelDeviceTrackingServiceProvider;
 
 class ExampleTest extends TestCase
 {
-
     protected function getPackageProviders($app)
     {
         return [LaravelDeviceTrackingServiceProvider::class];
