@@ -5,7 +5,6 @@ namespace IvanoMatteo\LaravelDeviceTracking;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \IvanoMatteo\LaravelDeviceTracking\Skeleton\SkeletonClass
  */
 class LaravelDeviceTrackingFacade extends Facade
 {

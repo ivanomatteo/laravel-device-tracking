@@ -91,6 +91,7 @@ class LaravelDeviceTracking
     public function checkSessionDeviceHash()
     {
         if (Auth::guard('web')->check()) {
+
             $sessionMd5 = session(config('laravel-device-tracking.session_key'));
             $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
 
@@ -111,6 +112,7 @@ class LaravelDeviceTracking
     public function setSessionDeviceHash()
     {
         if (Auth::guard('web')->check()) {
+
             $currentMd5 = md5(request()->userAgent() . $this->getCookieID());
             session([config('laravel-device-tracking.session_key') => $currentMd5]);
         }

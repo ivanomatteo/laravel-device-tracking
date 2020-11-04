@@ -3,6 +3,7 @@
 namespace IvanoMatteo\LaravelDeviceTracking;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 
 class DeviceHijackingDetectorDefault implements DeviceHijackingDetector
@@ -22,7 +23,7 @@ class DeviceHijackingDetectorDefault implements DeviceHijackingDetector
                     return 'intranet device changed ip';
                 }
             }
-
+            
             if (Str::startsWith($device->ip, '10.') && !Str::startsWith($device->ip, '10.')) {
                 return 'intranet device changed network';
             }
