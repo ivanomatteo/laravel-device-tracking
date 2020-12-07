@@ -289,9 +289,8 @@ class LaravelDeviceTracking
         $newUserId = optional($user)->getKey();
 
         if ($newUserId && $this->userId !== $newUserId) {
-            $shouldAttack = $user && ($isDeviceJustCreated || $this->currentDevice->whereHas('user', function ($q) use ($newUserId) {
-                $q->where('device_user.user_id', '=', $newUserId);
-            })->count() === 0);
+
+            $shouldAttack = $user && ($isDeviceJustCreated || !$this->currentDevice->isUsedBy($newUserId));
 
             if ($shouldAttack) {
                 $this->currentDevice->user()->attach($user);

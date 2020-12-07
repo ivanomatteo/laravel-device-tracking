@@ -49,6 +49,8 @@ class User{
 
 
 // call on login or when you want update and check the device informations
+// by default this function is called when the Login event is fired
+// id you want you can disable the detect_on_login option in the config file
 $device = \DeviceTracker::detectFindAndUpdate();
 
 
@@ -61,18 +63,6 @@ $device = \DeviceTracker::detectFindAndUpdate();
 // flag as verified for a specific user by device uuid
 \DeviceTracker::flagAsVerifiedByUuid($device_uuid, $user_id);
 
-
-
-// if you are using laravel/ui (classic scaffolding)
-// a good place where detectFindAndUpdate() is in the login controller
-// App\Http\Controllers\Auth\LoginController
-// by adding this method:
-protected function authenticated(Request $request, $user)
-{
-    $device = \DeviceTracker::detectFindAndUpdate();
-
-    //
-}
 
 ```
 

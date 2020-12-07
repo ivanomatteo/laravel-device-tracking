@@ -109,4 +109,12 @@ class Device extends Model
         return $this->hasOne(DeviceUser::class)
             ->where('user_id', '=', optional(Auth::user())->id);
     }
+
+    public function isUsedBy($user_id)
+    {
+        $count = $this->user()
+            ->where('device_user.user_id',$user_id)->count();
+
+        return $count > 0;
+    }
 }
