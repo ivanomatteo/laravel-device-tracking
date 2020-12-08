@@ -26,6 +26,8 @@ class LoginListener
      */
     public function handle($event)
     {
-        \DeviceTracker::detectFindAndUpdate();
+        if (Auth::guard('web')->check()) {
+            \DeviceTracker::detectFindAndUpdate();
+        }
     }
 }
