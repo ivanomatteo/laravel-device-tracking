@@ -51,7 +51,7 @@ class User{
 // call on login or when you want update and check the device informations
 // by default this function is called when the Login event is fired 
 // only with the "web" auth guard
-// id you want you can disable the detect_on_login option in the config file
+// if you want you can disable the detect_on_login option in the config file
 $device = \DeviceTracker::detectFindAndUpdate();
 
 
