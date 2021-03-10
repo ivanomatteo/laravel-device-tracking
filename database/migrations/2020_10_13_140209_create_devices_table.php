@@ -14,8 +14,8 @@ class CreateDevicesTable extends Migration
     public function up()
     {
         Schema::create('devices', function (Blueprint $table) {
-            $table->id();
-            $table->string('device_uuid')->unique();
+            $table->increments('id');
+            $table->uuid('device_uuid')->unique();
             $table->string('device_type')->index();
             $table->string('ip',40)->index();
 
