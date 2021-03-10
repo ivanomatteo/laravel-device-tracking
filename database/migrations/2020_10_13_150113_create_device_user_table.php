@@ -14,9 +14,9 @@ class CreateDeviceUserTable extends Migration
     public function up()
     {
         Schema::create('device_user', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->index();
-            $table->foreignId('device_id')->index();
+            $table->increments('id');
+            $table->uuid('user_id')->index();
+            $table->uuid('device_id')->index();
             $table->index(['user_id','device_id']);
             
             $table->timestamp('verified_at')->nullable();
