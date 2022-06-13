@@ -53,11 +53,7 @@ class Device extends Model
         'data' => 'array',
     ];
 
-
-    public function touch()
-    {
-        $this->{static::UPDATED_AT} = now();
-    }
+    
     /**
      * @return string user class fqn
      */

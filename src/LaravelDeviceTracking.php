@@ -271,8 +271,7 @@ class LaravelDeviceTracking
             $isDeviceJustCreated = !$this->currentDevice->exists;
 
             $this->currentDevice->touch();
-            $this->currentDevice->save();
-
+            
             if ($isDeviceDirty) {
                 if ($isDeviceJustCreated) {
                     DeviceCreated::dispatch($this->currentDevice, $user);
