@@ -16,7 +16,11 @@ class CreateDeviceUserTable extends Migration
         Schema::create('device_user', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->index();
-            $table->foreignId('device_id')->index();
+            
+            $table->foreignId('device_id')->index()
+                ->constrained('devices')
+                ->cascadeOnDelete();
+
             $table->index(['user_id','device_id']);
             
             $table->timestamp('verified_at')->nullable();

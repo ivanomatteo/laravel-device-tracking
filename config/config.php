@@ -13,7 +13,6 @@ return [
     'device_cookie' => 'device_uuid',
 
     'session_key' => 'laravel-device-tracking',
-    'session_cache_minutes' => 5,
 
     // must implement: IvanoMatteo\LaravelDeviceTracking\DeviceHijackingDetector
     'hijacking_detector' => DeviceHijackingDetectorDefault::class,

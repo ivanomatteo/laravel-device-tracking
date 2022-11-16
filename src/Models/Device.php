@@ -54,7 +54,7 @@ class Device extends Model
         'device_hijacked_at' => 'datetime',
     ];
 
-    
+
     /**
      * @return string user class fqn
      */
@@ -95,6 +95,7 @@ class Device extends Model
                 'verified_at'
             ])->withTimestamps();
     }
+    
 
 
     public function pivot()
@@ -110,9 +111,16 @@ class Device extends Model
 
     public function isUsedBy($user_id)
     {
-        $count = $this->user()
-            ->where('device_user.user_id',$user_id)->count();
+        return $this->user()
+            ->where('device_user.user_id', $user_id)->exists();
+    }
 
-        return $count > 0;
+    public function isCurrentUserAttached()
+    {
+        $attached = !!$this->currentUserStatus;
+        if (!$this->currentUserStatus) {
+            $this->unsetRelation('currentUserStatus');
+        }
+        return $attached;
     }
 }

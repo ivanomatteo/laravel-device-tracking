@@ -22,14 +22,14 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 
 /**
- * @property int $userId
+ * @property Model $lastUser
  * @property Device $currentDevice
  * @property DeviceHijackingDetector $hijackingDetector
  * @property array{"device_type": string, "data": array, "device_uuid":string} $detectData
  */
 class LaravelDeviceTracking
 {
-    private $userId;
+    private $lastUser;
     private $detectData;
     private $currentDevice;
     private $hijackingDetector;
@@ -108,11 +108,9 @@ class LaravelDeviceTracking
         if (Auth::guard('web')->check()) {
 
             $sessionData = session(config('laravel-device-tracking.session_key'));
-            $cacheSeconds = 60 * config('laravel-device-tracking.session_cache_minutes');
 
             if (
                 empty($sessionData['current_md5']) ||
-                ((time() - $sessionData['last_check_at']) > $cacheSeconds) ||
                 $sessionData['current_md5'] !== $this->getRequestHash()
             ) {
                 return false;
@@ -131,11 +129,9 @@ class LaravelDeviceTracking
     public function setSessionDeviceHash()
     {
         if (Auth::guard('web')->check()) {
-
             session([
                 config('laravel-device-tracking.session_key') => [
                     'current_md5' => $this->getRequestHash(),
-                    'last_check_at' => time(),
                 ]
             ]);
         }
@@ -230,7 +226,7 @@ class LaravelDeviceTracking
     {
         $this->detect();
 
-        $device_uuid =  Str::uuid()->toString() . ':' . Str::random(16);
+        $device_uuid =  Str::uuid()->toString() . ':' . Str::random(64);
         $data = $this->detectData['data'];
         $device_type = $this->detectData['device_type'];
         $ip = Request::ip();
@@ -272,6 +268,7 @@ class LaravelDeviceTracking
             $this->currentDevice = null;
         }
 
+        /** @var Model */
         $user = Auth::user();
 
         $isDeviceJustCreated = false;
@@ -290,7 +287,7 @@ class LaravelDeviceTracking
             $isDeviceJustCreated = !$this->currentDevice->exists;
 
             $this->currentDevice->touch();
-            
+
             if ($isDeviceDirty) {
                 if ($isDeviceJustCreated) {
                     DeviceCreated::dispatch($this->currentDevice, $user);
@@ -304,20 +301,13 @@ class LaravelDeviceTracking
         }
 
 
-        $currentUserId = optional($user)->getKey();
 
-        if ($currentUserId && $this->userId !== $currentUserId) {
+        if ($user && (!$this->lastUser || $this->lastUser->getKey() !== $user->getKey())) {
 
-        if ($newUserId && $this->userId !== $newUserId) {
+            $shouldAttack = $isDeviceJustCreated || !$this->currentDevice->isCurrentUserAttached();
 
-            $shouldAttack = $user && ($isDeviceJustCreated || !$this->currentDevice->isUsedBy($newUserId));
-
-            if ($shouldAttach) {
+            if ($shouldAttack) {
                 $this->currentDevice->user()->attach($user);
-                if (!$this->currentDevice->currentUserStatus) {
-                    $this->currentDevice->load('currentUserStatus');
-                }
-
                 UserSeenFromNewDevice::dispatch($this->currentDevice, $user);
             } else {
                 if (!optional($this->currentDevice->currentUserStatus)->verified_at) {
@@ -326,7 +316,7 @@ class LaravelDeviceTracking
             }
         }
 
-        $this->userId = $currentUserId;
+        $this->lastUser = $user;
 
         return $this->currentDevice;
     }
