@@ -1,12 +1,12 @@
 <?php
 
-namespace IvanoMatteo\LaravelDeviceTracking;
+namespace IvanoMatteo\LaravelDeviceTracking\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  */
-class LaravelDeviceTrackingFacade extends Facade
+class DeviceTracker extends Facade
 {
     /**
      * Get the registered name of the component.

@@ -46,7 +46,7 @@
                 "IvanoMatteo\\LaravelDeviceTracking\\LaravelDeviceTrackingServiceProvider"
             ],
             "aliases": {
-                "DeviceTracker": "IvanoMatteo\\LaravelDeviceTracking\\LaravelDeviceTrackingFacade"
+                "DeviceTracker": "IvanoMatteo\\LaravelDeviceTracking\\Facades\\DeviceTracker"
             }
         }
     }
