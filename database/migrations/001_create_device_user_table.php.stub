@@ -23,6 +23,7 @@ class CreateDeviceUserTable extends Migration
 
             $table->index(['user_id','device_id']);
             
+            $table->string('name')->nullable();
             $table->timestamp('verified_at')->nullable();
 
             $table->timestamps();

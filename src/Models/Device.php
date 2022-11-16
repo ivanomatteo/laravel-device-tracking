@@ -92,7 +92,7 @@ class Device extends Model
         return $this->belongsToMany(static::getUserClass(), 'device_user')
             ->using(DeviceUser::class)
             ->withPivot([
-                'verified_at'
+                'verified_at','name'
             ])->withTimestamps();
     }
     

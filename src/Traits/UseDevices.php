@@ -8,6 +8,8 @@ trait UseDevices
 {
     public function device()
     {
-        return $this->belongsToMany(Device::class, 'device_user')->withPivot('verified_at')->withTimestamps();
+        return $this->belongsToMany(Device::class, 'device_user')
+            ->withPivot(['verified_at','name'])
+            ->withTimestamps();
     }
 }

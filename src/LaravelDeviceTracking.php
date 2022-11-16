@@ -191,26 +191,26 @@ class LaravelDeviceTracking
     }
 
 
-    public function flagAsVerified(Device $device, $user_id)
+    public function flagAsVerified(Device $device, $user_id, $name = null)
     {
         $device->pivot()
             ->where('user_id', '=', $user_id)
-            ->update(['verified_at' => now()]);
+            ->update(['verified_at' => now(), 'name' => $name]);
     }
-    public function flagAsVerifiedByUuid($device_uuid, $user)
+    public function flagAsVerifiedByUuid($device_uuid, $user, $name = null)
     {
         DeviceUser::where('user_id', '=', $user)
             ->whereHas('device', function ($q) use ($device_uuid) {
                 $q->where('device_uuid', '=', $device_uuid);
             })
-            ->update(['verified_at' => now()]);
+            ->update(['verified_at' => now(), 'name' => $name]);
     }
 
-    public function flagCurrentAsVerified()
+    public function flagCurrentAsVerified($name = null)
     {
         if (Auth::check()) {
             $this->detectFindAndUpdate()->currentUserStatus
-                ->fill(['verified_at' => now()])
+                ->fill(['verified_at' => now(), 'name' => $name])
                 ->save();
         } else {
             throw new HttpException(500, 'an unser must be logged in to verify the current device');
