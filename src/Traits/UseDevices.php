@@ -12,4 +12,13 @@ trait UseDevices
             ->withPivot(['verified_at','name'])
             ->withTimestamps();
     }
+
+
+    /** 
+     * @return bool
+     */
+    public function deviceShouldBeDetected()
+    {
+        return true;
+    }
 }
