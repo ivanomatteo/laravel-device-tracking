@@ -3,6 +3,8 @@
 namespace IvanoMatteo\LaravelDeviceTracking;
 
 use hisorange\BrowserDetect\Contracts\ResultInterface;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +20,13 @@ use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 use IvanoMatteo\LaravelDeviceTracking\Models\DeviceUser;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+
+/**
+ * @property int $userId
+ * @property Device $currentDevice
+ * @property DeviceHijackingDetector $hijackingDetector
+ * @property array{"device_type": string, "data": array, "device_uuid":string} $detectData
+ */
 class LaravelDeviceTracking
 {
     private $userId;
@@ -98,10 +107,14 @@ class LaravelDeviceTracking
     {
         if (Auth::guard('web')->check()) {
 
-            $sessionMd5 = session(config('laravel-device-tracking.session_key'));
-            $currentMd5 = $this->getRequestHash();
+            $sessionData = session(config('laravel-device-tracking.session_key'));
+            $cacheSeconds = 60 * config('laravel-device-tracking.session_cache_minutes');
 
-            if (!$sessionMd5 || $currentMd5 !== $sessionMd5) {
+            if (
+                empty($sessionData['current_md5']) ||
+                ((time() - $sessionData['last_check_at']) > $cacheSeconds) ||
+                $sessionData['current_md5'] !== $this->getRequestHash()
+            ) {
                 return false;
             } else {
                 return true;
@@ -119,8 +132,12 @@ class LaravelDeviceTracking
     {
         if (Auth::guard('web')->check()) {
 
-            $currentMd5 = $this->getRequestHash();
-            session([config('laravel-device-tracking.session_key') => $currentMd5]);
+            session([
+                config('laravel-device-tracking.session_key') => [
+                    'current_md5' => $this->getRequestHash(),
+                    'last_check_at' => time(),
+                ]
+            ]);
         }
     }
 
@@ -160,6 +177,7 @@ class LaravelDeviceTracking
             return $this->currentDevice;
         }
 
+        /** @var Device|null */
         $this->currentDevice = Device::where('device_uuid', '=', $this->getCookieID())->first();
 
         if (!$this->currentDevice && $orNew) {
@@ -250,17 +268,18 @@ class LaravelDeviceTracking
     public function detectFindAndUpdate(bool $reDetectDevice = false)
     {
         if ($reDetectDevice) {
+            /** @var Device|null */
             $this->currentDevice = null;
         }
 
-        /** @var Model */
         $user = Auth::user();
 
         $isDeviceJustCreated = false;
 
 
         if (!isset($this->currentDevice)) {
-            $this->findCurrentDevice(true, true);
+
+            $this->currentDevice = $this->findCurrentDevice(true, true);
 
             if ($hijackMessage = $this->getHijackingDetector()->detect($this->currentDevice, $user)) {
                 $this->currentDevice->device_hijacked_at = now();
@@ -285,14 +304,20 @@ class LaravelDeviceTracking
         }
 
 
-        $newUserId = optional($user)->getKey();
+        $currentUserId = optional($user)->getKey();
+
+        if ($currentUserId && $this->userId !== $currentUserId) {
 
         if ($newUserId && $this->userId !== $newUserId) {
 
             $shouldAttack = $user && ($isDeviceJustCreated || !$this->currentDevice->isUsedBy($newUserId));
 
-            if ($shouldAttack) {
+            if ($shouldAttach) {
                 $this->currentDevice->user()->attach($user);
+                if (!$this->currentDevice->currentUserStatus) {
+                    $this->currentDevice->load('currentUserStatus');
+                }
+
                 UserSeenFromNewDevice::dispatch($this->currentDevice, $user);
             } else {
                 if (!optional($this->currentDevice->currentUserStatus)->verified_at) {
@@ -301,8 +326,7 @@ class LaravelDeviceTracking
             }
         }
 
-        $this->userId = $newUserId;
-
+        $this->userId = $currentUserId;
 
         return $this->currentDevice;
     }

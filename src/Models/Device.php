@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * @property string $device_uuid
  * @property string $device_type
  * @property string $ip
- * @property string|null $device_hijacked_at
+ * @property \Illuminate\Support\Carbon|null $device_hijacked_at
  * @property array|null $data
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -51,6 +51,7 @@ class Device extends Model
     protected $guarded = [];
     protected $casts = [
         'data' => 'array',
+        'device_hijacked_at' => 'datetime',
     ];
 
     
@@ -90,7 +91,9 @@ class Device extends Model
     {
         return $this->belongsToMany(static::getUserClass(), 'device_user')
             ->using(DeviceUser::class)
-            ->withPivot('verified_at')->withTimestamps();
+            ->withPivot([
+                'verified_at'
+            ])->withTimestamps();
     }
 
 
@@ -98,7 +101,6 @@ class Device extends Model
     {
         return $this->hasMany(DeviceUser::class);
     }
-
 
     public function currentUserStatus()
     {
