@@ -17,7 +17,15 @@ class DeviceTrackerMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::guard('web')->check()) {
+        $guard = Auth::guard('web');
+
+        if ($guard->check()) {
+            /** @var object */
+            $user = $guard->user();
+            
+            if (!$user->deviceShouldBeDetected()) {
+                return $next($request);
+            }
 
             /** @var LaravelDeviceTracking */
             $ldt = App::make('laravel-device-tracking');
