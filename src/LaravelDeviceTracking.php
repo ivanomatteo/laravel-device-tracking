@@ -226,7 +226,7 @@ class LaravelDeviceTracking
     {
         $this->detect();
 
-        $device_uuid =  Str::uuid()->toString() . ':' . Str::random(64);
+        $device_uuid =  Str::uuid()->toString() . Str::random(64);
         $data = $this->detectData['data'];
         $device_type = $this->detectData['device_type'];
         $ip = Request::ip();
