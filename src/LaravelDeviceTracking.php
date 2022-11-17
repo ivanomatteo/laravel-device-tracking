@@ -158,7 +158,7 @@ class LaravelDeviceTracking
             null,
             null,
             null,
-            true, // http only
+            config('laravel-device-tracking.cookie_http_only'), // http only
             false,
             null // same site
         ));

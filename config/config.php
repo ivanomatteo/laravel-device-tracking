@@ -11,6 +11,8 @@ return [
 
     // the device identifier cookie
     'device_cookie' => 'device_uuid',
+    
+    'cookie_http_only' => true,
 
     'session_key' => 'laravel-device-tracking',
 
