@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('devices', function (Blueprint $table) {
-            $table->boolean('is_rogue_device')->index();
+            $table->boolean('is_rogue_device')->default(false)->index();
         });
     }
 
