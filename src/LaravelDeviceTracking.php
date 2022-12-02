@@ -15,6 +15,7 @@ use IvanoMatteo\LaravelDeviceTracking\Events\DeviceCreated;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceHijacked;
 use IvanoMatteo\LaravelDeviceTracking\Events\DeviceUpdated;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromNewDevice;
+use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromRogueDevice;
 use IvanoMatteo\LaravelDeviceTracking\Events\UserSeenFromUnverifiedDevice;
 use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 use IvanoMatteo\LaravelDeviceTracking\Models\DeviceUser;
@@ -81,6 +82,21 @@ class LaravelDeviceTracking
                 'ip_addresses' => Request::ips(),
                 'user_agent' => Str::limit(Request::header('user-agent'), 512),
             ];
+
+            if (config('laravel-device-tracking.geoip_provider')) {
+
+                $ip = Request::ip();
+                /** @var GeoIpProvider */
+                $geoipProvider = App::make(config('laravel-device-tracking.geoip_provider'));
+
+                $data['geo'] = [
+                    'country_iso_code' => $geoipProvider->getCountryIsoCode($ip),
+                    'country' => $geoipProvider->getCountry($ip),
+                    'state' => $geoipProvider->getState($ip),
+                    'city' => $geoipProvider->getCity($ip),
+                    'coord' => $geoipProvider->getCoord($ip),
+                ];
+            }
 
             $device_uuid = $this->getCookieID();
 
@@ -213,7 +229,36 @@ class LaravelDeviceTracking
                 ->fill(['verified_at' => now(), 'name' => $name])
                 ->save();
         } else {
-            throw new HttpException(500, 'an unser must be logged in to verify the current device');
+            throw new HttpException(500, 'an user must be logged in to verify the current device');
+        }
+    }
+
+
+
+    public function flagCurrentAsRogue($note = null)
+    {
+        if (Auth::check()) {
+            $device = $this->detectFindAndUpdate();
+            $device->fill(['is_rogue_device' => true])
+                ->save();
+
+            $device->currentUserStatus
+                ->fill(['reported_as_rogue_at' => now(), 'note' => $note])
+                ->save();
+        } else {
+            throw new HttpException(500, 'an user must be logged in to verify the current device');
+        }
+    }
+
+    public function flagAsRogue(Device $device, $user_id = null, $note = null)
+    {
+        $device->is_rogue_device = true;
+        $device->save();
+
+        if ($user_id) {
+            $device->pivot()
+                ->where('user_id', '=', $user_id)
+                ->update(['verified_at' => now(), 'note' => $note]);
         }
     }
 
@@ -313,6 +358,10 @@ class LaravelDeviceTracking
                 if (!optional($this->currentDevice->currentUserStatus)->verified_at) {
                     UserSeenFromUnverifiedDevice::dispatch($this->currentDevice, $user);
                 }
+            }
+
+            if ($this->currentDevice->is_rogue_device) {
+                UserSeenFromRogueDevice::dispatch($this->currentDevice, $user);
             }
         }
 

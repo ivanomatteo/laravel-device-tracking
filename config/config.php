@@ -9,6 +9,8 @@ return [
 
     'detect_on_login' => true,
 
+    'geoip_provider' => null, // must implement: IvanoMatteo\LaravelDeviceTracking\GeoIpProvider
+
     // the device identifier cookie
     'device_cookie' => 'device_uuid',
     

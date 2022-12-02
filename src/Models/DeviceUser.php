@@ -33,7 +33,9 @@ class DeviceUser extends Pivot
 
     protected $casts = [
         'verified_at' => 'datetime',
+        'reported_as_rogue_at' => 'datetime',
     ];
+    protected $guarded = [];
 
 
     public function device()

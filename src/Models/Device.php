@@ -92,10 +92,10 @@ class Device extends Model
         return $this->belongsToMany(static::getUserClass(), 'device_user')
             ->using(DeviceUser::class)
             ->withPivot([
-                'verified_at','name'
+                'verified_at', 'name', 'reported_as_rogue_at', 'note'
             ])->withTimestamps();
     }
-    
+
 
 
     public function pivot()
