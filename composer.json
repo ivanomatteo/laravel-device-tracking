@@ -16,12 +16,12 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
-        "hisorange/browser-detect": "^4.2"
+        "php": ">=8.0",
+        "hisorange/browser-detect": "^4.5"
     },
     "require-dev": {
-        "orchestra/testbench": "^4.0",
-        "phpunit/phpunit": "^8.0"
+        "orchestra/testbench": "^7.15",
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {
