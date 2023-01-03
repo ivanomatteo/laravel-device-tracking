@@ -20,10 +20,11 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $is_rogue_device
  * @property-read \IvanoMatteo\LaravelDeviceTracking\Models\DeviceUser|null $currentUserStatus
  * @property-read \Illuminate\Database\Eloquent\Collection|\IvanoMatteo\LaravelDeviceTracking\Models\DeviceUser[] $pivot
  * @property-read int|null $pivot_count
- * @property-read \Illuminate\Database\Eloquent\Collection|User[] $user
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $user
  * @property-read int|null $user_count
  * @method static \Illuminate\Database\Eloquent\Builder|Device newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Device newQuery()
@@ -37,9 +38,11 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * @method static \Illuminate\Database\Eloquent\Builder|Device whereDeviceUuid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Device whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Device whereIp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Device whereIsRogueDevice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Device whereUpdatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|Device withTrashed()
  * @method static \Illuminate\Database\Query\Builder|Device withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Device extends Model
@@ -48,6 +51,9 @@ class Device extends Model
     protected static $class;
 
 
+    protected $hidden = [
+        'device_uuid'
+    ];
     protected $guarded = [];
     protected $casts = [
         'data' => 'array',

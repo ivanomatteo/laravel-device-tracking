@@ -6,10 +6,13 @@ use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 
 trait UseDevices
 {
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function device()
     {
         return $this->belongsToMany(Device::class, 'device_user')
-            ->withPivot(['verified_at','name'])
+            ->withPivot(['verified_at', 'name', 'reported_as_rogue_at', 'note', 'admin_note'])
             ->withTimestamps();
     }
 
