@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property \Illuminate\Support\Carbon|null $reported_as_rogue_at
  * @property string|null $note
  * @property string|null $admin_note
+ * @property array|null $data
  * @property-read \IvanoMatteo\LaravelDeviceTracking\Models\Device $device
  * @property-read \App\Models\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|DeviceUser newModelQuery()
@@ -42,6 +43,7 @@ class DeviceUser extends Pivot
     protected $casts = [
         'verified_at' => 'datetime',
         'reported_as_rogue_at' => 'datetime',
+        'data' => 'array',
     ];
     protected $guarded = [];
     protected $hidden = [
