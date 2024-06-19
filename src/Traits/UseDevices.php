@@ -12,10 +12,9 @@ trait UseDevices
     public function device()
     {
         return $this->belongsToMany(Device::class, 'device_user')
-            ->withPivot(['verified_at', 'name', 'reported_as_rogue_at', 'note', 'admin_note'])
+            ->withPivot(['verified_at', 'name', 'reported_as_rogue_at', 'note', 'admin_note', 'data'])
             ->withTimestamps();
     }
-
 
     /** 
      * @return bool
