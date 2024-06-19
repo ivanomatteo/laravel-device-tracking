@@ -168,16 +168,18 @@ class LaravelDeviceTracking
      */
     public function setCookieID($id)
     {
-        Cookie::queue(Cookie::forever(
-            config('laravel-device-tracking.device_cookie'),
-            $id,
-            null,
-            null,
-            null,
-            config('laravel-device-tracking.cookie_http_only'), // http only
-            false,
-            null // same site
-        ));
+        Cookie::queue(
+            Cookie::forever(
+                config('laravel-device-tracking.device_cookie'),
+                $id,
+                null,
+                null,
+                null,
+                config('laravel-device-tracking.cookie_http_only'), // http only
+                false,
+                null // same site
+            )
+        );
     }
 
     /**
@@ -235,7 +237,7 @@ class LaravelDeviceTracking
 
 
 
-    public function flagCurrentAsRogue($note = null)
+    public function flagCurrentAsRogue($note = null, $adminNote = null, $data = null)
     {
         if (Auth::check()) {
             $device = $this->detectFindAndUpdate();
@@ -243,23 +245,37 @@ class LaravelDeviceTracking
                 ->save();
 
             $device->currentUserStatus
-                ->fill(['reported_as_rogue_at' => now(), 'note' => $note])
+                ->fill([
+                    'reported_as_rogue_at' => now(),
+                    'note' => $note,
+                    'admin_note' => $adminNote,
+                    'data' => $data,
+                ])
                 ->save();
         } else {
             throw new HttpException(500, 'an user must be logged in to verify the current device');
         }
     }
 
-    public function flagAsRogue(Device $device, $user_id = null, $note = null)
+    public function flagAsRogue(Device $device, $user_id = null, $note = null, $adminNote = null, $data = null)
     {
         $device->is_rogue_device = true;
         $device->save();
 
-        if ($user_id) {
-            $device->pivot()
-                ->where('user_id', '=', $user_id)
-                ->update(['verified_at' => now(), 'note' => $note]);
+        if (!$user_id) {
+            return;
         }
+
+        $device->pivot()
+            ->when($user_id !== 'all', function ($q) use ($user_id) {
+                $q->where('user_id', '=', $user_id);
+            })
+            ->update([
+                'verified_at' => now(),
+                'note' => $note,
+                'admin_note' => $adminNote,
+                'data' => json_encode($data),
+            ]);
     }
 
 
@@ -271,7 +287,7 @@ class LaravelDeviceTracking
     {
         $this->detect();
 
-        $device_uuid =  Str::uuid()->toString() . Str::random(64);
+        $device_uuid = Str::uuid()->toString() . Str::random(64);
         $data = $this->detectData['data'];
         $device_type = $this->detectData['device_type'];
         $ip = Request::ip();

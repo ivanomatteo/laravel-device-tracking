@@ -52,7 +52,9 @@ class Device extends Model
 
 
     protected $hidden = [
-        'device_uuid'
+        'device_uuid',
+        'admin_note',
+        'data',
     ];
     protected $guarded = [];
     protected $casts = [
