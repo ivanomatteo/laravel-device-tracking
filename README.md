@@ -24,27 +24,35 @@ You can install the package via composer:
 
 composer require ivanomatteo/laravel-device-tracking
 
-php artisan migrate
+```
 
+Publish migrations:
+
+```bash
+php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\LaravelDeviceTrackingServiceProvider" --tag migrations
+```
+
+Run migrations:
+```bash
+php artisan migrate
 ```
 
 Publish config file:
 
 ```bash
-
 php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\LaravelDeviceTrackingServiceProvider" --tag config
-
 ```
 
 ## Usage
 
 ```php
 
+use IvanoMatteo\LaravelDeviceTracking\Facades\DeviceTracker;
+use IvanoMatteo\LaravelDeviceTracking\Traits\UseDevices;
+
 // add the trait to your user model
-class User{
-    //...
-    use IvanoMatteo\LaravelDeviceTracking\Traits\UseDevices;
-    //...
+class User {
+    use UseDevices;
 }
 
 
@@ -52,17 +60,17 @@ class User{
 // by default this function is called when the Login event is fired 
 // only with the "web" auth guard
 // if you want you can disable the detect_on_login option in the config file
-$device = \DeviceTracker::detectFindAndUpdate();
+$device = DeviceTracker::detectFindAndUpdate();
 
 
 // flag as verified for the current user
-\DeviceTracker::flagCurrentAsVerified();
+DeviceTracker::flagCurrentAsVerified();
 
 // flag as verified for a specific user
-\DeviceTracker::flagAsVerified($device, $user_id);
+DeviceTracker::flagAsVerified($device, $user_id);
 
 // flag as verified for a specific user by device uuid
-\DeviceTracker::flagAsVerifiedByUuid($device_uuid, $user_id);
+DeviceTracker::flagAsVerifiedByUuid($device_uuid, $user_id);
 
 
 ```
@@ -73,8 +81,6 @@ If you are using Session Authentication it's possible to add the middleware
 This way, the device will also be checked for **subsequents** requests to the login request.
 **DeviceTrackerMiddleware** will store the md5(request()->ip() . $device_uuid . $user_agent ) inside the session
 so the detection will be executed again only if the hash does not match.  
-
-
 
 
 
