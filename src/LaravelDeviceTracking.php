@@ -365,9 +365,9 @@ class LaravelDeviceTracking
 
         if ($user && (!$this->lastUser || $this->lastUser->getKey() !== $user->getKey())) {
 
-            $shouldAttack = $isDeviceJustCreated || !$this->currentDevice->isCurrentUserAttached();
+            $shouldAttach = $isDeviceJustCreated || !$this->currentDevice->isCurrentUserAttached();
 
-            if ($shouldAttack) {
+            if ($shouldAttach) {
                 $this->currentDevice->user()->attach($user);
                 UserSeenFromNewDevice::dispatch($this->currentDevice, $user);
             } else {
