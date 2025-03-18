@@ -49,6 +49,7 @@ php artisan vendor:publish --provider "IvanoMatteo\LaravelDeviceTracking\Laravel
 
 use IvanoMatteo\LaravelDeviceTracking\Facades\DeviceTracker;
 use IvanoMatteo\LaravelDeviceTracking\Traits\UseDevices;
+use IvanoMatteo\LaravelDeviceTracking\Models\Device;
 
 // add the trait to your user model
 class User {
@@ -71,6 +72,10 @@ DeviceTracker::flagAsVerified($device, $user_id);
 
 // flag as verified for a specific user by device uuid
 DeviceTracker::flagAsVerifiedByUuid($device_uuid, $user_id);
+
+
+DeviceTracker::flagCurrentAsRogue($note = null, $adminNote = null, $data = null);
+DeviceTracker::flagAsRogue($device, $user_id = null, $note = null, $adminNote = null, $data = null);
 
 
 ```
@@ -109,6 +114,10 @@ Following events can be emitted:
 * **UserSeenFromUnverifiedDevice**
 
     when a user is detected on a device not for the first time and the device is not flagged as verified
+
+* **UserSeenFromRogueDevice**
+
+    when a user is detected on a device flagged as "rougue"
 
 ### Changelog
 
